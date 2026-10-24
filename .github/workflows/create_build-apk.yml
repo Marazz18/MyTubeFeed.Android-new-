@@ -1,0 +1,81 @@
+name: Build Android APK & Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repozitáře
+        uses: actions/checkout@v4
+
+      - name: Nastavení Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Nastavení Java 17 (pro Android Gradle)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Instalace závislostí a příprava Capacitor Android projektu
+        run: |
+          npm install
+          npm run prepare-www
+          if [ ! -d "android" ]; then
+            npx cap add android
+          else
+            npx cap sync android
+          fi
+          node scripts/patch-android.js
+
+      - name: Sestavení a podepsání APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cd android
+          chmod +x gradlew
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > release-key.jks
+            ./gradlew assembleRelease \
+              -Pandroid.injected.signing.store.file=$(pwd)/release-key.jks \
+              -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
+              -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
+              -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
+          else
+            keytool -genkeypair -v -keystore release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias mytube -storepass mytube123 -keypass mytube123 -dname "CN=MyTube Feed, O=MyTube, C=CZ"
+            ./gradlew assembleRelease \
+              -Pandroid.injected.signing.store.file=$(pwd)/release-key.jks \
+              -Pandroid.injected.signing.store.password="mytube123" \
+              -Pandroid.injected.signing.key.alias="mytube" \
+              -Pandroid.injected.signing.key.password="mytube123"
+          fi
+          cp app/build/outputs/apk/release/app-release.apk ../MyTube-Feed.apk
+
+      - name: Uložení APK jako artefaktu v GitHub Actions
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyTube-Feed-APK
+          path: MyTube-Feed.apk
+
+      - name: Připojení APK k GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'v0.9.4' }}
+          name: ${{ github.ref_type == 'tag' && github.ref_name || 'Verze 0.9.4' }}
+          files: MyTube-Feed.apk
