@@ -1,0 +1,73 @@
+name: Build Android APK & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repozitáře
+        uses: actions/checkout@v4
+
+      - name: Nastavení Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Nastavení Java 21 (pro Android Gradle)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Nastavení Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalace závislostí a příprava Capacitor Android projektu
+        run: |
+          npm install
+          npm run prepare-www
+          if [ ! -d "android" ]; then
+            npx cap add android
+          else
+            npx cap sync android
+          fi
+          node scripts/patch-android.js
+
+      - name: Sestavení APK a podepsání produkčním klíčem (pro aktualizovatelnost na Androidu a Zapstore)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cd android
+          chmod +x gradlew
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > release-key.jks
+            ./gradlew assembleRelease               -Pandroid.injected.signing.store.file=$(pwd)/release-key.jks               -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD"               -Pandroid.injected.signing.key.alias="$KEY_ALIAS"               -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
+            cp app/build/outputs/apk/release/app-release.apk ../MyTube-Feed.apk
+          else
+            # Pokud zatím nejsou nastavené GitHub Secrets, vygeneruje deterministický keystore nebo debug APK
+            ./gradlew assembleDebug
+            cp app/build/outputs/apk/debug/app-debug.apk ../MyTube-Feed.apk
+          fi
+
+      - name: Uložení APK jako artefaktu v GitHub Actions
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyTube-Feed-APK
+          path: MyTube-Feed.apk
+
+      - name: Připojení APK k GitHub Release (při pushnutí tagu v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: MyTube-Feed.apk
