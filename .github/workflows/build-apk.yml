@@ -65,24 +65,3 @@ jobs:
           tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'v0.9.4' }}
           name: ${{ github.ref_type == 'tag' && github.ref_name || 'Verze 0.9.4' }}
           files: MyTube-Feed.apk
-
-      - name: Publikování na Zapstore
-        env:
-          SIGN_WITH: ${{ secrets.SIGN_WITH }}
-        run: |
-          if [ -z "$SIGN_WITH" ]; then
-            echo "Chybí SIGN_WITH v GitHub Secrets!"
-            exit 1
-          fi
-          ZSP_URL=$(curl -s https://api.github.com/repos/zapstore/zsp/releases/latest | grep -o 'https://[^"]*linux-amd64[^"]*' | head -n 1)
-          curl -L "$ZSP_URL" -o zsp_archive
-          if echo "$ZSP_URL" | grep -q "\.tar\.gz$"; then
-            tar -xzf zsp_archive
-          elif echo "$ZSP_URL" | grep -q "\.zip$"; then
-            unzip -o zsp_archive
-          else
-            mv zsp_archive zsp
-          fi
-          chmod +x zsp
-          echo "y" | ./zsp publish --skip-preview --skip-certificate-linking || true
-          ./zsp publish --quiet --skip-preview --skip-certificate-linking --overwrite-release
