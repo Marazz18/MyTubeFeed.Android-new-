@@ -84,4 +84,4 @@ jobs:
             mv zsp_archive zsp
           fi
           chmod +x zsp
-          ./zsp publish --yes || ./zsp publish
+          ./zsp publish --quiet
