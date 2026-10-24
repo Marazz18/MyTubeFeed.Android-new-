@@ -46,11 +46,7 @@ jobs:
           cd android
           chmod +x gradlew
           keytool -genkeypair -v -keystore release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias mytube -storepass mytube123 -keypass mytube123 -dname "CN=MyTube Feed, O=MyTube, C=CZ"
-          ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=$(pwd)/release-key.jks \
-            -Pandroid.injected.signing.store.password="mytube123" \
-            -Pandroid.injected.signing.key.alias="mytube" \
-            -Pandroid.injected.signing.key.password="mytube123"
+          ./gradlew assembleRelease             -Pandroid.injected.signing.store.file=$(pwd)/release-key.jks             -Pandroid.injected.signing.store.password="mytube123"             -Pandroid.injected.signing.key.alias="mytube"             -Pandroid.injected.signing.key.password="mytube123"
           cp app/build/outputs/apk/release/app-release.apk ../MyTube-Feed.apk
 
       - name: Uložení APK jako artefaktu v GitHub Actions
@@ -62,18 +58,15 @@ jobs:
       - name: Připojení APK k GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'v0.9.5' }}
-          name: ${{ github.ref_type == 'tag' && github.ref_name || 'Verze 0.9.5' }}
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'v0.9.4' }}
+          name: ${{ github.ref_type == 'tag' && github.ref_name || 'Verze 0.9.4' }}
           files: MyTube-Feed.apk
 
       - name: Publikování na Zapstore
+        if: env.SIGN_WITH != ''
         env:
           SIGN_WITH: ${{ secrets.SIGN_WITH }}
         run: |
-          if [ -z "$SIGN_WITH" ]; then
-            echo "Chybí SIGN_WITH v GitHub Secrets!"
-            exit 1
-          fi
           ZSP_URL=$(curl -s https://api.github.com/repos/zapstore/zsp/releases/latest | grep -o 'https://[^"]*linux-amd64[^"]*' | head -n 1)
           curl -L "$ZSP_URL" -o zsp_archive
           if echo "$ZSP_URL" | grep -q "\.tar\.gz$"; then
@@ -84,4 +77,4 @@ jobs:
             mv zsp_archive zsp
           fi
           chmod +x zsp
-          ./zsp publish --quiet --skip-preview --skip-certificate-linking --overwrite-release
+          ./zsp publish --yes || ./zsp publish
