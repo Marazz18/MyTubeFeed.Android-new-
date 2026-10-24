@@ -4,10 +4,6 @@ repository: https://github.com/Marazz18/MyTube-Feed
 homepage: https://github.com/Marazz18/MyTube-Feed
 license: MIT
 pubkey: npub1g3t284ae9rp94e4f8unuqxa7u5u6xtzxwjnea9607q75xah8te4sp7glya
-assets: MyTube-Feed.apk
-tags:
-  - nostr
-  - youtube
-  - rss
-  - video
-  - privacy
+assets:
+  - MyTube-Feed.apk
+tags: "nostr, youtube, rss, video, privacy"
