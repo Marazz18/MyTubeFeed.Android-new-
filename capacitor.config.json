@@ -1,0 +1,13 @@
+{
+  "appId": "cz.mytube.feed",
+  "appName": "MyTube Feed",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}

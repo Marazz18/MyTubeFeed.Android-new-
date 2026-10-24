@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>MyTube Feed</title>
+  <link rel="stylesheet" href="feed.css">
+</head>
+<body>
+  <header>
+    <h1>Můj feed</h1>
+    <div class="bar">
+      <a id="updateBanner" href="#" target="_blank" class="btn" style="background:#b3261e;color:#fff;border-color:#8c1d18;text-decoration:none;" hidden>🚀 Stáhnout aktualizaci</a>
+      <label class="chk"><input id="hideSeen" type="checkbox"> Skrýt zhlédnutá</label>
+      <label class="chk"><input id="hideShorts" type="checkbox"> Skrýt shorts</label>
+      <button id="addUrlBtn" title="Přidat kanál nebo video pomocí odkazu / @handle">＋ URL / Kanál</button>
+      <button id="newFolder" class="icon" title="Přidat složku">+</button>
+      <div class="menuwrap">
+        <button id="menuBtn" class="icon" title="Další nastavení" aria-haspopup="true" aria-expanded="false">⚙</button>
+        <div id="menu" class="menu" hidden>
+          <button id="refresh" title="Obnovit feed">↻ Obnovit feed</button>
+          <button id="browserBtn" title="Zvolit prohlížeč pro otevírání videí (Brave, Firefox…)">🌐 Prohlížeč videí</button>
+          <button id="popout" title="Otevřít na celé stránce">⤢ Otevřít na celé stránce</button>
+          <button id="syncBtn" title="Synchronizace přes Nostr">⇄ Sync</button>
+          <hr>
+          <button id="export">⬇ Export zálohy</button>
+          <label class="mitem">⬆ Import zálohy<input id="import" type="file" accept="application/json" hidden></label>
+        </div>
+      </div>
+    </div>
+  </header>
+  <nav class="tabs">
+    <button data-tab="my">Můj feed</button>
+    <button data-tab="all">Vše</button>
+    <button data-tab="subs">Subscribe list</button>
+    <button data-tab="wl">Watch later</button>
+    <span class="sp"></span>
+    <button id="filterBtn" title="Vyber, které složky se zobrazí v Můj feed">Složky ▾</button>
+  </nav>
+  <div id="filter" hidden></div>
+  <main id="cols"></main>
+
+  <dialog id="syncDlg" class="dlg">
+    <h2>Synchronizace přes Nostr</h2>
+    <div id="syncBody"></div>
+    <div class="dlgfoot"><button id="syncClose">Zavřít</button></div>
+  </dialog>
+
+  <dialog id="browserDlg" class="dlg">
+    <h2>Otevírání videí v prohlížeči</h2>
+    <div id="browserBody"></div>
+    <div class="dlgfoot"><button id="browserClose">Zavřít</button></div>
+  </dialog>
+
+  <dialog id="addUrlDlg" class="dlg">
+    <h2>Přidat video nebo kanál</h2>
+    <div id="addUrlBody"></div>
+    <div class="dlgfoot"><button id="addUrlClose">Zavřít</button></div>
+  </dialog>
+
+  <script src="nostr.bundle.js"></script>
+  <script src="shared.js"></script>
+  <script src="sync.js"></script>
+  <script src="feed.js"></script>
+</body>
+</html>

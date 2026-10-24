@@ -1,0 +1,19 @@
+{
+  "name": "mytube-feed",
+  "version": "0.9.4",
+  "description": "Vlastní složky kanálů, feed bez přihlášení, watch later a sledování zhlédnutých videí s šifrovanou Nostr synchronizací (NIP-44).",
+  "private": true,
+  "scripts": {
+    "prepare-www": "node scripts/prepare-www.js",
+    "cap:init": "npm run prepare-www && npx cap add android && node scripts/patch-android.js",
+    "cap:sync": "npm run prepare-www && npx cap sync android && node scripts/patch-android.js",
+    "build:nostr": "cd nostr-src && npm install && npm run build"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}

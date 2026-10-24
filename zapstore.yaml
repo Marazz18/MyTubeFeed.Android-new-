@@ -1,0 +1,14 @@
+# Konfigurace pro publikaci na Zapstore (https://zapstore.dev)
+name: MyTube Feed
+summary: Soukromý YouTube feed bez účtu s vlastními složkami, Watch later a šifrovanou synchronizací přes Nostr (NIP-44).
+repository: https://github.com/Marazz18/MyTube-Feed
+homepage: https://github.com/Marazz18/MyTube-Feed
+license: MIT
+tags:
+  - nostr
+  - youtube
+  - rss
+  - video
+  - privacy
+# Pro automatické ověření (auto-whitelist) na Zapstore sem vlož svůj veřejný Nostr klíč (npub1...):
+# pubkey: npub1...
