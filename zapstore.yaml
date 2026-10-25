@@ -1,6 +1,6 @@
 name: MyTube Feed
 summary: Soukromý YouTube feed bez účtu s vlastními složkami, Watch later a šifrovanou synchronizací přes Nostr (NIP-44).
-repository: https://github.com/Marazz18/MyTube-Feed
+repository: https://github.com/Marazz18/MyTubeFeed.Android-new-
 homepage: https://github.com/Marazz18/MyTube-Feed
 license: MIT
 pubkey: npub1g3t284ae9rp94e4f8unuqxa7u5u6xtzxwjnea9607q75xah8te4sp7glya
